@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetes Prediction Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+        .download-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .download-button:hover {
+            background-color: #0056b3;
+        }
+        .pagination {
+            margin-top: 20px;
+        }
+        .pagination a {
+            padding: 8px 16px;
+            text-decoration: none;
+            border: 1px solid #ddd;
+            color: #007BFF;
+        }
+        .pagination a.active {
+            background-color: #007BFF;
+            color: white;
+        }
+        .pagination a:hover:not(.active) {
+            background-color: #ddd;
+        }
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+        }
+        .tab button:hover {
+            background-color: #ddd;
+        }
+        .tab button.active {
+            background-color: #ccc;
+        }
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+        .eda-content, .visualization-content {
+            text-align: left;
+            margin: 20px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Diabetes Prediction Result</h1>
+
+    <!-- Tab links -->
+    <div class="tab">
+        <button class="tablinks" onclick="openTab(event, 'Predictions')">Predictions</button>
+        <button class="tablinks" onclick="openTab(event, 'EDA')">EDA</button>
+        <button class="tablinks" onclick="openTab(event, 'Visualizations')">Visualizations</button>
+    </div>
+
+    <!-- Tab content -->
+    <div id="Predictions" class="tabcontent" style="display:block;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Row</th>
+                    <th>Prediction</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                    <tr>
+                        <td>{{ loop.index + ((page - 1) * 20) }}</td>
+                        <td>{{ result }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div class="pagination">
+            {% if page > 1 %}
+                <a href="{{ url_for('predict_diabetes', page=page-1) }}">Previous</a>
+            {% endif %}
+            <a href="{{ url_for('predict_diabetes', page=page+1) }}">Next</a>
+        </div>
+
+        <a href="/download_results" class="download-button">Download Results</a>
+        <br>
+        <a href="/">Upload Another CSV</a>
+    </div>
+
+    <div id="EDA" class="tabcontent">
+        <h2>Exploratory Data Analysis</h2>
+        <div class="eda-content">
+            <h3>Summary Statistics</h3>
+            {{ insights['summary'] | safe }}
+        </div>
+    </div>
+
+    <div id="Visualizations" class="tabcontent">
+        <h2>Visualizations</h2>
+        <div class="visualization-content">
+            <h3>Correlation Matrix</h3>
+            <img src="data:image/png;base64,{{ visualizations['correlation'] }}" alt="Correlation Matrix">
+
+            <h3>Histograms</h3>
+            {% for column, img in visualizations['histograms'].items() %}
+                <h4>{{ column }}</h4>
+                <img src="data:image/png;base64,{{ img }}" alt="{{ column }} Histogram">
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+    </script>
+</body>
+</html>
